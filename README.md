@@ -6,9 +6,9 @@
 이용하여 입력된 프로그램의 결과를 출력하는 프로그램입니다.<br/> 
 */  
 //문법<br/> 
-\<program> → <statements>  
-\<statements>→ <statement> | <statement><semi_colon><statements>  
-<statement> → <ident><assignment_op><expression>  
+\<program> → \<statements>  
+\<statements>→ \<statement> | \<statement><semi_colon>\<statements>  
+\<statement> → <ident><assignment_op><expression>  
 <expression> → <term><term_tail>  
 <term_tail> → <add_op><term><term_tail> | ε  
 <term> → <factor> <factor_tail>  
