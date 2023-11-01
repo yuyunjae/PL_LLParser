@@ -1,4 +1,4 @@
-#include "llparser.h"
+#include "lex.h"
 
 int main(int argc, char **argv)
 {
@@ -10,5 +10,11 @@ int main(int argc, char **argv)
     }
     filename = argv[1];
     Lex lexemes(filename); // 파일 읽고 해당 파일에 있는 모든 lexeme들을 lexical analyzer로 쪼개서 token으로 구별해놓기.
+    lexemes.file_read();
+    vector<pair<string, int>> token_vector = lexemes.get_vector();
+    for (const auto& token : token_vector) {
+            cout << "Lexeme: " << token.first << ", Token Code: " << token.second << endl;
+    }
+
     return (0);
 }
