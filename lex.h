@@ -40,7 +40,8 @@ private:
     string filename; // 읽어야할 파일이름.
     vector<pair<string, int>> lexeme_table; // <lexeme, 토큰 코드>
     vector<line_ans> statement; // 각 statement들의 id, const, op 개수 + 파싱 결과
-    string token_string;
+    string token_string; // 각 lexeme의 문자열
+    line_ans state; // statememt에 들어갈 각 statement의 요소들.
     char ch; // 파일에서 읽어오는 char 1개(1byte).
     int next_token; // 읽어온 token의 타입(코드들).
     int char_class; // 하나의 ch를 읽었을 때 예상되는 lex의 그 타입.
@@ -52,6 +53,7 @@ private:
 public:
     Lex(string file_name);
     vector<pair<string, int>> get_vector() const;
+    vector<line_ans> get_statement() const;
     void lexical(ifstream& r_file);
     int file_read();
 };

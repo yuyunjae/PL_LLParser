@@ -5,6 +5,10 @@ Lex::Lex(string file_name)
     filename = file_name;
     next_token = WHITE_SPACE;
     num_state = 0;
+    state.const_count= 0;
+    state.id = 0;
+    state.op = 0;
+    state.parsing_output = 0;
     //token = 
 }
 
@@ -16,6 +20,7 @@ int Lex::file_read()
     {
         while (next_token != EOF)
         {
+            get_char(r_file);
             lexical(r_file);
         }
         r_file.close();
@@ -56,24 +61,33 @@ void Lex::lookup()
     else if (ch == '+')
     {
         next_token = ADD_OP;
+        state.op += 1;
     }
     else if (ch == '-')
     {
         next_token = SUB_OP;
+        state.op += 1;
     }
     else if (ch == '*')
     {
         next_token = MULT_OP;
+        state.op += 1;
     }
     else if (ch == '/')
     {
         next_token = DIV_OP;
+        state.op += 1;
     }
     else if (ch == ':')
         next_token = COLON;
     else if (ch == ';')
     {
         next_token = SEMI_COLON;
+        statement.push_back(state);
+        state.const_count= 0;
+        state.id = 0;
+        state.op = 0;
+        state.parsing_output = 0;
         num_state += 1;
     }
     // white space 일떄
@@ -83,7 +97,6 @@ void Lex::lookup()
 
 void Lex::lexical(ifstream& r_file)
 {
-    get_char(r_file);
     switch (char_class)
     {
         case LETTER: // 문자나 숫자 바로 뒤에 특수기호나 이상하게 오면 warning 없이 그냥 씹어버림. 수정하기.
@@ -94,8 +107,11 @@ void Lex::lexical(ifstream& r_file)
             }
             // _________만 예외처리해주기 (언더바 오는거)
             next_token = IDENT;
+            state.id += 1; // 1d개수 증가.
             lexeme_table.push_back(make_pair(token_string, next_token));
             token_string.clear();
+            if (char_class == UNKNOWN) // 만약 괄호닫기 처럼 바로 붙어서 오는 어떤 lexeme일 경우, 수정할것!.unknown말고 가능성 있는 것만..
+                return lexical(r_file);
             break;
     
         case DIGIT:
@@ -105,8 +121,15 @@ void Lex::lexical(ifstream& r_file)
                 get_char(r_file);
             }
             next_token = INT_LIT;
+            state.const_count += 1; // const 개수 증가.
             lexeme_table.push_back(make_pair(token_string, next_token));
             token_string.clear();
+            if (char_class == UNKNOWN) // 만약 괄호닫기 처럼 바로 붙어서 오는 어떤 lexeme일 경우
+                return lexical(r_file);
+            else if (char_class == LETTER) // 숫자 뒤에 바로 문자가 올 경우, 문자 삭제 
+            {
+                //
+            }
             break;
 
         case WHITE_SPACE:
@@ -115,6 +138,11 @@ void Lex::lexical(ifstream& r_file)
 
         case EOF:
             //string에 뭐 있으면 저장하고 비우기??
+            statement.push_back(state);
+            state.const_count= 0;
+            state.id = 0;
+            state.op = 0;
+            state.parsing_output = 0;
             break;
 
         case UNKNOWN:
@@ -130,6 +158,11 @@ void Lex::lexical(ifstream& r_file)
                     lexeme_table.push_back(make_pair(token_string, next_token));
                     token_string.clear();
                 }
+                else
+                {
+                    
+                    // warning! 등호가 오지 않았으므로 :는 올바른 토큰이 아님. -> 삭제
+                }
             }
             else if(next_token >= 21 && next_token <= 27)
             {
@@ -138,7 +171,9 @@ void Lex::lexical(ifstream& r_file)
                 token_string.clear();
             }
             else
+            {
                 cout << ch << " 에 해당하는 문자는 들어갈 수 없습니다.\n"; // just 표시. 나중에 수정해놓기
+            }
             break;
         default:
             break;
@@ -146,6 +181,12 @@ void Lex::lexical(ifstream& r_file)
     //b_char_class = char_class;
 }
 
-vector<pair<string, int>> Lex::get_vector() const {
+vector<pair<string, int>> Lex::get_vector() const
+{
     return lexeme_table;
+}
+
+vector<line_ans> Lex::get_statement() const
+{
+    return statement;
 }
