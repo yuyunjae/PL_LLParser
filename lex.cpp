@@ -89,7 +89,7 @@ void Lex::lexical(ifstream& r_file)
         case LETTER:
             while (char_class == LETTER || char_class == DIGIT)
             {
-                token_string + ch;
+                token_string += ch;
                 get_char(r_file);
             }
             // _________만 예외처리해주기 (언더바 오는거)
@@ -101,7 +101,7 @@ void Lex::lexical(ifstream& r_file)
         case DIGIT:
             while (char_class == DIGIT)
             {
-                token_string + ch;
+                token_string += ch;
                 get_char(r_file);
             }
             next_token = INT_LIT;
@@ -118,11 +118,11 @@ void Lex::lexical(ifstream& r_file)
             lookup();
             if (next_token == COLON)
             {
-                token_string + ch;
+                token_string += ch;
                 get_char(r_file);
                 if(ch == '=')
                 {
-                    token_string + ch;
+                    token_string += ch;
                     next_token = ASSIGN_OP;
                     lexeme_table.push_back(make_pair(token_string, next_token));
                     token_string.clear();
@@ -130,7 +130,7 @@ void Lex::lexical(ifstream& r_file)
             }
             else if(next_token >= 21 && next_token <= 27)
             {
-                token_string + ch;
+                token_string += ch;
                 lexeme_table.push_back(make_pair(token_string, next_token));
                 token_string.clear();
             }
@@ -141,6 +141,6 @@ void Lex::lexical(ifstream& r_file)
     //b_char_class = char_class;
 }
 
-vector<pair<string, int>> Lex::get_vector() const {
+vector<pair<string, int> > Lex::get_vector() const {
     return lexeme_table;
 }

@@ -14,7 +14,7 @@ using namespace std;
 #define DIGIT 1 // 숫자
 #define UNKNOWN 99 // 정해지지 않은 값
 /* 토큰코드들 */ // next_token
-#define INT_LIT 10 // 
+#define INT_LIT 10 // const (상수)
 #define IDENT 11 // 식별자(nonterminal)
 #define COLON 19 // 등호 앞에 와서 유도할수있도록 해주는 콜론 :
 #define ASSIGN_OP 20 // 등호 = (:= 가 되어야 유도할 수 있는 하나의 토큰이 됨.)
@@ -50,7 +50,7 @@ private:
     void lookup();
 public:
     Lex(string file_name);
-    vector<pair<string, int>> Lex::get_vector() const;
+    vector<pair<string, int> > get_vector() const;
     void lexical(ifstream& r_file);
     int file_read();
 };

@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     lexemes.file_read();
     vector<pair<string, int>> token_vector = lexemes.get_vector();
     for (const auto& token : token_vector) {
-            cout << "Lexeme: " << token.first << ", Token Code: " << token.second << endl;
+            cout << "Token Code: " << token.second << ", Lexeme: " << token.first << endl;
     }
 
     return (0);
