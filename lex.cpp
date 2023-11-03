@@ -91,7 +91,7 @@ void Lex::lookup()
         num_state += 1;
     }
     // white space 일떄
-    else
+    else if (ch == EOF)
         next_token = EOF; // 혹은 애러...
 }
 
@@ -128,7 +128,8 @@ void Lex::lexical(ifstream& r_file)
                 return lexical(r_file);
             else if (char_class == LETTER) // 숫자 뒤에 바로 문자가 올 경우, 문자 삭제 
             {
-                //
+                // 공백이나 연산자가 올때까지 get_char해서 다 지워버려야 할듯?
+                // ex> 13421asad2s -> 13421 atoi함수처럼 처리해야 할듯.
             }
             break;
 
@@ -138,6 +139,7 @@ void Lex::lexical(ifstream& r_file)
 
         case EOF:
             //string에 뭐 있으면 저장하고 비우기??
+            //if (token_string.size())
             statement.push_back(state);
             state.const_count= 0;
             state.id = 0;
@@ -160,7 +162,9 @@ void Lex::lexical(ifstream& r_file)
                 }
                 else
                 {
-                    
+                    token_string.clear();
+                    state.parsing_output = 1;
+                    // 에러메시지 저장하는 것도 생각해야 할 듯.
                     // warning! 등호가 오지 않았으므로 :는 올바른 토큰이 아님. -> 삭제
                 }
             }

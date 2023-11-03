@@ -21,6 +21,5 @@ int main(int argc, char **argv)
     for (const auto& state : statement) {
             cout << "ID: " << state.id << "; CONST: " << state.const_count << "; OP: " << state.op << ";" << endl;
     }
-
     return (0);
 }
