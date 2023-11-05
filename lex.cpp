@@ -1,4 +1,5 @@
 #include "lex.h"
+#include "derivation.h" //추가
 
 Lex::Lex(string file_name)
 {
@@ -126,6 +127,7 @@ void Lex::lexical(ifstream& r_file)
                     next_token = ASSIGN_OP;
                     lexeme_table.push_back(make_pair(token_string, next_token));
                     token_string.clear();
+                    get_char(r_file); //오류 수정용 임시추가
                 }
             }
             else if(next_token >= 21 && next_token <= 27)
