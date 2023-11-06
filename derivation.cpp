@@ -59,7 +59,12 @@ std::shared_ptr<Node> Derivation::statements()
     // symbol table에서 LHS값 계산해놓기.
     if (next_token.second == SEMI_COLON) {
         node->children.push_back(semi_colon());
+        // 콜론 출력 0
         node->children.push_back(statements());
+    }
+    else
+    {
+        // 콜론 출력 x
     }
     return node;
 }
@@ -77,6 +82,10 @@ std::shared_ptr<Node> Derivation::statement()
             // := 가 없는 배정문? ㅋㅋㅋㅋ 이걸 어떻게 에러처리해..
         }
         //
+        for (auto iter = node->children.begin() + 1; iter < node->children.end(); iter++)
+        {
+            //
+        }
     }
     return node;
 }
@@ -335,7 +344,7 @@ std::shared_ptr<Node> Derivation::assignment_op()
 {
     std::shared_ptr<Node> assignment_op_node = std::make_shared<Node>("assignment_op");
     assignment_op_node->children.push_back(std::make_shared<Node>(":="));
-    //이것만 불러와서 저장하는 게 아니라 직접 저장하는 방식으로 수정(:, =이 다른 lexeme이라서)
+    //이것만 불러와서 저장하는 게 아니라 직접 저장하는 방식으로 수정(:, =이 다른 lexeme으로 해석되지 않게)
     next_token = lex();
     return assignment_op_node;
 }
@@ -438,8 +447,18 @@ void Derivation::resetCounts() {
 
 void Derivation::printSymbolTableAll()
 {
-    for (auto iter = symbol_table.begin(); iter < symbol_table.end(); iter++)
+    std::cout << "Result ==> ";
+    for (auto iter = symbol_table.begin(); iter < symbol_table.end() - 1; iter++)
     {
-        //cout
+        std::cout << iter->name << ": ";
+        if (!iter->is_unknown)
+            std::cout << iter->num << "; ";
+        else
+            std::cout << "UnKnown; ";
     }
+    std::cout << (symbol_table.end() - 1)->name << ": ";
+        if (!(symbol_table.end() - 1)->is_unknown)
+            std::cout << (symbol_table.end() - 1)->num;
+        else
+            std::cout << "UnKnown";
 }
