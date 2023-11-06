@@ -27,21 +27,13 @@ using namespace std;
 #define SEMI_COLON 27 // 문장의 끝을 알려주는 세미콜론 ;
 #define WHITE_SPACE 32 // ascii코드 32이하는 각 token을 구분하는 용도로 사용
 
-typedef struct program_line{
-    int id; // id개수
-    int const_count; // const 개수
-    int op; // 연산자 개수
-    int parsing_output; // 0->ok, 1->warning, 2->error
-} line_ans; // 각 statement의 출력해야 할 것들.
-
 class Lex
 {
 private:
     string filename; // 읽어야할 파일이름.
     vector<pair<string, int>> lexeme_table; // <lexeme, 토큰 코드>
-    vector<line_ans> statement; // 각 statement들의 id, const, op 개수 + 파싱 결과
+    vector<pair<string, int>> statement; // 각 statement들의 lex class에서의 오류. 에러
     string token_string; // 각 lexeme의 문자열
-    line_ans state; // statememt에 들어갈 각 statement의 요소들.
     char ch; // 파일에서 읽어오는 char 1개(1byte).
     int next_token; // 읽어온 token의 타입(코드들).
     int char_class; // 하나의 ch를 읽었을 때 예상되는 lex의 그 타입.
@@ -53,7 +45,7 @@ private:
 public:
     Lex(string file_name);
     vector<pair<string, int>> get_vector() const;
-    vector<line_ans> get_statement() const;
+    vector<pair<string, int>> get_statement() const;
     void lexical(ifstream& r_file);
     int file_read();
 };
