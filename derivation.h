@@ -8,6 +8,7 @@ public:
     string name;
     vector<shared_ptr<Node>> children;
 
+    void printTree(int level) const;
 
     Node(const string& name) : name(name) {}
 };
@@ -24,6 +25,9 @@ private:
 
 public:
     pair<string, int> lex();
+
+    pair<string, int> current_lex();
+    
     shared_ptr<Node> programs();
     shared_ptr<Node> statements();
     shared_ptr<Node> statement();
@@ -40,7 +44,7 @@ public:
     shared_ptr<Node> mult_operator();
     shared_ptr<Node> left_paren();
     shared_ptr<Node> right_paren();
-    shared_ptr<Node> error();
+    void error();
 
     Derivation(const vector<pair<string, int>> &lex_table);
 

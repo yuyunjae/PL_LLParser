@@ -1,7 +1,16 @@
 #include "lex.h"
 #include "derivation.h"
 
+void Node::printTree(int level) const
+{
+    std::string indent(level * 2, ' '); // 각 레벨에 대해 2칸씩 들여쓰기를 합니다.
+    std::cout << indent << this->name << std::endl;
 
+    for (auto& child : this->children)
+    {
+        child->printTree(level + 1); // 자식 노드에 대해 재귀적으로 함수를 호출합니다.
+    }
+}
 
 Derivation::Derivation(const vector<pair<string, int>>& lex_table) : lexeme_table(lex_table){
     next_token = lex(); // 첫 번째 토큰을 가져옵니다.
@@ -16,6 +25,16 @@ std::pair<std::string, int> Derivation::lex()
     } else {
         return lexeme_table[current_index++];
     }
+}
+
+std::pair<std::string, int> Derivation::current_lex()
+{
+    if (current_index >= lexeme_table.size()) {
+        // 더 이상 읽을 토큰이 없을 경우, EOF를 의미하는 토큰을 반환합니다.
+        return make_pair("", EOF);
+    } else {
+        return lexeme_table[current_index];
+        }
 }
 
 std::shared_ptr<Node> Derivation::programs() 
@@ -74,7 +93,7 @@ std::shared_ptr<Node> Derivation::term_tail()  //입실론 처리할 것
         }
     }
     else{
-        node->children.push_back(make_shared<Node>("UNKNOWN"));
+
     }
     return node;
 }
@@ -98,7 +117,6 @@ std::shared_ptr<Node> Derivation::factor_tail() //입실론 처리할 것
         }
     }
     else{
-        node->children.push_back(make_shared<Node>("UNKNOWN"));
         return node;
     }
     return node;
@@ -117,15 +135,8 @@ std::shared_ptr<Node> Derivation::factor()
     }    
     else if (next_token.second == LEFT_PAREN){
         node->children.push_back(left_paren());
-        node->children.push_back(expression());
-        
-        if(next_token.second == RIGHT_PAREN){
-            node->children.push_back(right_paren());
-            
-        }
-        else{
-            error();
-        }
+        node->children.push_back(expression());      
+        node->children.push_back(right_paren());
     }
     else{
         error();
@@ -136,11 +147,8 @@ std::shared_ptr<Node> Derivation::factor()
 std::shared_ptr<Node> Derivation::int_lit()
 {
     std::shared_ptr<Node> int_lit_node = std::make_shared<Node>("int_lit");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    int_lit_node->children.push_back(std::make_shared<Node>(token.first));
+    int_lit_node->children.push_back(std::make_shared<Node>(next_token.first));
     CONST++;
-    current_index--;
     next_token = lex();
     return int_lit_node;
 }
@@ -148,11 +156,8 @@ std::shared_ptr<Node> Derivation::int_lit()
 std::shared_ptr<Node> Derivation::ident()
 {
     std::shared_ptr<Node> ident_node = std::make_shared<Node>("ident");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    ident_node->children.push_back(std::make_shared<Node>(token.first));
+    ident_node->children.push_back(std::make_shared<Node>(next_token.first));
     ID++;
-    current_index--;
     next_token = lex();
     return ident_node;
 }
@@ -160,11 +165,8 @@ std::shared_ptr<Node> Derivation::ident()
 std::shared_ptr<Node> Derivation::assignment_op()
 {
     std::shared_ptr<Node> assignment_op_node = std::make_shared<Node>("assignment_op");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
     assignment_op_node->children.push_back(std::make_shared<Node>(":="));
     //이것만 불러와서 저장하는 게 아니라 직접 저장하는 방식으로 수정(:, =이 다른 lexeme이라서)
-    current_index--;
     next_token = lex();
     return assignment_op_node;
 }
@@ -173,9 +175,7 @@ std::shared_ptr<Node> Derivation::assignment_op()
 std::shared_ptr<Node> Derivation::semi_colon()
 {
     std::shared_ptr<Node> semi_colon_node = std::make_shared<Node>("semi_colon");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    semi_colon_node->children.push_back(std::make_shared<Node>(token.first));
+    semi_colon_node->children.push_back(std::make_shared<Node>(next_token.first));
     
     // ID, OP, CONST의 개수를 출력
     std::cout << "ID count: " << getIDCount() << std::endl;
@@ -183,7 +183,6 @@ std::shared_ptr<Node> Derivation::semi_colon()
     std::cout << "OP count: " << getOPCount() << std::endl;
     resetCounts();
 
-    current_index--;
     next_token = lex();
     return semi_colon_node;
 }
@@ -191,11 +190,8 @@ std::shared_ptr<Node> Derivation::semi_colon()
 std::shared_ptr<Node> Derivation::add_operator()
 {
     std::shared_ptr<Node> add_operator_node = std::make_shared<Node>("add_operator");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    add_operator_node->children.push_back(std::make_shared<Node>(token.first));
+    add_operator_node->children.push_back(std::make_shared<Node>(next_token.first));
     OP++;
-    current_index--;
     next_token = lex();
     return add_operator_node;
 }
@@ -203,11 +199,8 @@ std::shared_ptr<Node> Derivation::add_operator()
 std::shared_ptr<Node> Derivation::mult_operator()
 {
     std::shared_ptr<Node> mult_operator_node = std::make_shared<Node>("mult_operator");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    mult_operator_node->children.push_back(std::make_shared<Node>(token.first));
+    mult_operator_node->children.push_back(std::make_shared<Node>(next_token.first));
     OP++;
-    current_index--;
     next_token = lex();
     return mult_operator_node;
 }
@@ -215,10 +208,7 @@ std::shared_ptr<Node> Derivation::mult_operator()
 std::shared_ptr<Node> Derivation::left_paren()
 {
     std::shared_ptr<Node> left_paren_node = std::make_shared<Node>("left_paren");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    left_paren_node->children.push_back(std::make_shared<Node>(token.first));
-    current_index--;
+    left_paren_node->children.push_back(std::make_shared<Node>(next_token.first));
     next_token = lex();
     return left_paren_node;
 }
@@ -226,21 +216,18 @@ std::shared_ptr<Node> Derivation::left_paren()
 std::shared_ptr<Node> Derivation::right_paren()
 {
     std::shared_ptr<Node> right_paren_node = std::make_shared<Node>("right_paren");
-    std::pair<std::string, int> token = lex(); // lex() 함수에서 현재 토큰을 가져옴
-    // 가져온 토큰으로 새로운 노드 생성해서 위에서 생성된 노드의 자식노드로 추가
-    right_paren_node->children.push_back(std::make_shared<Node>(token.first));
-    current_index--;
+    right_paren_node->children.push_back(std::make_shared<Node>(next_token.first));
     next_token = lex();
     return right_paren_node;
 }
 
-std::shared_ptr<Node> Derivation::error()
+void Derivation::error()
 {
     std::cerr << "Parsing Error: Unexpected token " << next_token.first << std::endl;
     std::cerr << "Number of IDENT tokens processed: " << getIDCount() << std::endl;
     std::cerr << "Number of CONST tokens processed: " << getCONSTCount() << std::endl;
     std::cerr << "Number of OP tokens processed: " << getOPCount() << std::endl;
-    return nullptr; // 이 부분은 실행되지 않지만, 함수의 반환 타입에 맞추기 위해 추가했습니다.
+     // 이 부분은 실행되지 않지만, 함수의 반환 타입에 맞추기 위해 추가했습니다.
 }
 
 int Derivation::getIDCount(){
