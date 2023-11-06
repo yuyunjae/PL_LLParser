@@ -66,8 +66,9 @@ public:
     void resetCounts();
 
     void printTree(const std::shared_ptr<Node>& node, int depth = 0);
+
+    void printStatement(const shared_ptr<Node>& node);
     void printSymbolTableAll();
-    void printStatement();
 };
 
 #endif

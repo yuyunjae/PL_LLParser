@@ -12,9 +12,12 @@ int main()
     for (const auto& token : token_vector) {
             cout << "Token Code: " << token.second << ", Lexeme: " << token.first << endl;
     }
+    std::cout << "\n\n";
     Derivation derivation(token_vector); // 파싱 객체 생성 (추가됨) 오류 수정 필요
     shared_ptr<Node> root = derivation.programs(); // 구문 트리 생성 (추가됨)
+    std::cout << "\n\n";
     root->printTree(0);
+    std::cout << "\n\n";
     derivation.printSymbolTableAll();
 
     return (0);

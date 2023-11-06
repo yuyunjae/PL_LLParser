@@ -14,6 +14,22 @@ void Node::printTree(int level) const
     }
 }
 
+void Derivation::printStatement(const shared_ptr<Node>& node)
+{
+    if (node->name != "statements" && node->name != "statement" && node->name != "expression" &&
+    node->name != "term_tail" && node->name != "term" && node->name != "factor_tail"
+    && node->name != "factor" && node->name != "assignment_op" && node->name != "ident" && node->name != "int_lit" 
+    && node->name != "semi_colon" && node->name != "add_operator" && node->name != "mult_operator" 
+    && node->name != "left_paren" && node->name != "right_paren")
+        std::cout << node->name << " ";
+    for (auto& child : node->children)
+    {
+        printStatement(child); // 자식 노드에 대해 재귀적으로 함수를 호출합니다.
+    }
+    if (node->name == "statements")
+        cout << "\n";
+}
+
 Derivation::Derivation(const vector<pair<string, int>>& lex_table) : lexeme_table(lex_table){
     next_token = lex(); // 첫 번째 토큰을 가져옵니다.
     resetCounts();
@@ -44,9 +60,12 @@ std::shared_ptr<Node> Derivation::programs()
     shared_ptr<Node> node = make_shared<Node>("programs");
     node->children.push_back(statements());
     // ID, OP, CONST의 개수를 출력
-    std::cout << "ID count: " << getIDCount() << std::endl;
-    std::cout << "CONST count: " << getCONSTCount() << std::endl;
-    std::cout << "OP count: " << getOPCount() << std::endl;
+    if (getIDCount() || getCONSTCount() || getOPCount())
+    {
+        std::cout << "ID: " << getIDCount() << "; ";
+        std::cout << "CONST: " << getCONSTCount() << "; ";
+        std::cout << "OP: " << getOPCount() << std::endl;
+    }
     return node;
 }
 
@@ -59,12 +78,25 @@ std::shared_ptr<Node> Derivation::statements()
     // symbol table에서 LHS값 계산해놓기.
     if (next_token.second == SEMI_COLON) {
         node->children.push_back(semi_colon());
-        // 세미콜론 출력 0
+        if (node->children.size() == 2)
+        {
+            // 세미콜론 출력 o
+            printStatement(node);
+            // ID, OP, CONST의 개수를 출력
+           if (getIDCount() || getCONSTCount() || getOPCount())
+            {
+                std::cout << "ID: " << getIDCount() << "; ";
+                std::cout << "CONST: " << getCONSTCount() << "; ";
+                std::cout << "OP: " << getOPCount() << std::endl;
+            }
+            resetCounts();
+        }
         node->children.push_back(statements());
     }
-    else
+    else if(node->children.size() == 1)
     {
         // 세미콜론 출력 x
+        printStatement(node);
     }
     return node;
 }
@@ -343,13 +375,21 @@ std::shared_ptr<Node> Derivation::ident()
                 {
                     ident_node->is_unknown = 1;
                     // 값이 정의가 되어 있지 않는 ident 에러
+                    // 에러 메시지 준비해야함.
+
+                    // idents id; //-> symbol table에 새로운 ident생성.
+
+                    // id.is_unknown = 1;
+                    // id.name = next_token.first;
+                    // id.num = 0;
+                    // symbol_table.push_back(id); // 새로 만들어는 주기.. -> seg fault가 뜨네..
                 }
             }
         }
         if (check_error)
         {
             ident_node->is_unknown = 1;
-            // LHS에 있는 ident임에도 symbol table에 ident가 없음. 에러
+            // LHS에 있는 ident임에도 symbol table에 ident가 없음. 이런 경우가 있으려나..
         }
     }
 
@@ -375,11 +415,6 @@ std::shared_ptr<Node> Derivation::semi_colon()
 {
     std::shared_ptr<Node> semi_colon_node = std::make_shared<Node>("semi_colon");
     semi_colon_node->children.push_back(std::make_shared<Node>(next_token.first));
-    // ID, OP, CONST의 개수를 출력
-    std::cout << "ID count: " << getIDCount() << std::endl;
-    std::cout << "CONST count: " << getCONSTCount() << std::endl;
-    std::cout << "OP count: " << getOPCount() << std::endl;
-    resetCounts();
 
     next_token = lex();
     return semi_colon_node;
