@@ -59,12 +59,12 @@ std::shared_ptr<Node> Derivation::statements()
     // symbol table에서 LHS값 계산해놓기.
     if (next_token.second == SEMI_COLON) {
         node->children.push_back(semi_colon());
-        // 콜론 출력 0
+        // 세미콜론 출력 0
         node->children.push_back(statements());
     }
     else
     {
-        // 콜론 출력 x
+        // 세미콜론 출력 x
     }
     return node;
 }
@@ -81,10 +81,28 @@ std::shared_ptr<Node> Derivation::statement()
         else{
             // := 가 없는 배정문? ㅋㅋㅋㅋ 이걸 어떻게 에러처리해..
         }
-        //
-        for (auto iter = node->children.begin() + 1; iter < node->children.end(); iter++)
+
+        // 잘 들어 왔다면,
+        for (auto iter= symbol_table.begin(); iter < symbol_table.end(); iter++)
         {
-            //
+            if (iter->name == node->children[0]->children[0]->name) // LHS와 이름이 같은 symbol 찾기
+            {
+                if (node->children.size() == 3 && !node->children[1]->is_unknown && !node->children[2]->is_unknown)
+                {
+                    node->is_unknown = 0;
+                    node->num = node->children[2]->num;
+                    iter->is_unknown = 0;
+                    iter->num = node->children[2]->num;
+                }
+                else
+                {
+                    node->is_unknown = 1;
+                    node->num = 0;
+                    iter->is_unknown = 1;
+                    iter->num = 0;
+                }
+                break ;
+            }
         }
     }
     return node;
@@ -345,6 +363,9 @@ std::shared_ptr<Node> Derivation::assignment_op()
     std::shared_ptr<Node> assignment_op_node = std::make_shared<Node>("assignment_op");
     assignment_op_node->children.push_back(std::make_shared<Node>(":="));
     //이것만 불러와서 저장하는 게 아니라 직접 저장하는 방식으로 수정(:, =이 다른 lexeme으로 해석되지 않게)
+    // := 가 잘 들어왔다면,
+    assignment_op_node->is_unknown = 0;
+    assignment_op_node->num = 0;
     next_token = lex();
     return assignment_op_node;
 }
