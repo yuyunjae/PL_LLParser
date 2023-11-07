@@ -5,8 +5,8 @@ void Node::printTree(int level) const
 {
     std::string indent(level * 2, ' '); // 각 레벨에 대해 2칸씩 들여쓰기를 합니다.
     std::cout << indent << this->name << std::endl;
-    // if (!this->is_unknown)
-    //     std::cout << indent << this->num << " " <<this->pos_neg << "\n";
+    if (!this->is_unknown)
+        std::cout << indent << this->num << " " <<this->pos_neg << "\n";
 
     for (auto& child : this->children)
     {
