@@ -372,24 +372,25 @@ std::shared_ptr<Node> Derivation::ident()
                     ident_node->is_unknown = 0;
                 }
                 else
-                {
+                {   // 전 배정문에서 unknown인 것이 이번 배정문에도 사용됨.
+                    check_error = 0;
                     ident_node->is_unknown = 1;
-                    // 값이 정의가 되어 있지 않는 ident 에러
-                    // 에러 메시지 준비해야함.
-
-                    // idents id; //-> symbol table에 새로운 ident생성.
-
-                    // id.is_unknown = 1;
-                    // id.name = next_token.first;
-                    // id.num = 0;
-                    // symbol_table.push_back(id); // 새로 만들어는 주기.. -> seg fault가 뜨네..
+                    ident_node->num = 0;
                 }
             }
         }
-        if (check_error)
+        if (check_error) // RHS임에도 symbol table에 없는 ident
         {
             ident_node->is_unknown = 1;
-            // LHS에 있는 ident임에도 symbol table에 ident가 없음. 이런 경우가 있으려나..
+            // 값이 정의가 되어 있지 않는 ident 에러
+                    // 에러 메시지 준비해야함.
+
+            idents id; //-> symbol table에 새로운 ident생성.
+
+            id.is_unknown = 1;
+            id.name = next_token.first;
+            id.num = 0;
+            symbol_table.push_back(id); // 새로 만들어는 주기.. 
         }
     }
 
