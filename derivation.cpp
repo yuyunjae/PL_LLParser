@@ -5,8 +5,8 @@ void Node::printTree(int level) const
 {
     std::string indent(level * 2, ' '); // 각 레벨에 대해 2칸씩 들여쓰기를 합니다.
     std::cout << indent << this->name << std::endl;
-    if (!this->is_unknown)
-        std::cout << indent << this->num << "\n";
+    // if (!this->is_unknown)
+    //     std::cout << indent << this->num << " " <<this->pos_neg << "\n";
 
     for (auto& child : this->children)
     {
@@ -425,8 +425,6 @@ std::shared_ptr<Node> Derivation::add_operator()
 {
     std::shared_ptr<Node> add_operator_node = std::make_shared<Node>("add_operator");
     add_operator_node->children.push_back(std::make_shared<Node>(next_token.first));
-    OP++;
-    next_token = lex();
 
     // 예외처리 가정.
     add_operator_node->is_unknown = 0;
@@ -435,6 +433,9 @@ std::shared_ptr<Node> Derivation::add_operator()
         add_operator_node->pos_neg = 0;
     else if (next_token.second == 22) // 빼기
         add_operator_node->pos_neg = 1;
+
+    OP++;
+    next_token = lex();
 
     return add_operator_node;
 }

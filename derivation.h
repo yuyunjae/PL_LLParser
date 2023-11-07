@@ -7,7 +7,7 @@
 typedef struct idents{
     string name;
     int num;
-    int is_unknown; // 1 -> Unknown , 0 -> known 
+    int is_unknown; // 1 -> Unknown, 0 -> known 
 } idents;
 
 class Node {

@@ -86,7 +86,6 @@ void Lex::lookup()
     {
         next_token = UNKNOWN;
     }
-    // white space 일때는 그냥 스킵.
 }
 
 void Lex::lexical(ifstream& r_file)
@@ -148,10 +147,22 @@ void Lex::lexical(ifstream& r_file)
                 else
                 {   // : 만 올떄
                     // warning! 등호가 오지 않았으므로 :는 올바른 토큰이 아님.
-                    string s = "(Warning) '=' symbol should come after ':'";
+                    string s = "(Warning) ':' should always be followed by '='. add '='";
                     statement.push_back(make_pair(s, num_state));
                     token_string.clear();
                     lexical(r_file);
+                }
+            }
+            else if(next_token == 22)
+            {  
+                token_string += ch;
+                get_char(r_file);
+                if (char_class == DIGIT)
+                    return lexical(r_file);
+                else
+                {
+                    lexeme_table.push_back(make_pair(token_string, next_token));
+                    token_string.clear();
                 }
             }
             else if(next_token >= 21 && next_token <= 27)
