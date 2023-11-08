@@ -31,8 +31,8 @@ class Lex
 {
 private:
     string filename; // 읽어야할 파일이름.
-    vector<pair<string, int>> lexeme_table; // <lexeme, 토큰 코드>
-    vector<pair<string, int>> statement; // 각 statement들의 lex class에서의 오류. 에러
+    vector<pair<string, int> > lexeme_table; // <lexeme, 토큰 코드>
+    vector<pair<string, int> > statement; // 각 statement들의 lex class에서의 오류. 에러
     string token_string; // 각 lexeme의 문자열
     char ch; // 파일에서 읽어오는 char 1개(1byte).
     int next_token; // 읽어온 token의 타입(코드들).
@@ -44,8 +44,8 @@ private:
     void lookup();
 public:
     Lex(string file_name);
-    vector<pair<string, int>> get_vector() const;
-    vector<pair<string, int>> get_statement() const;
+    vector<pair<string, int> > get_vector() const;
+    vector<pair<string, int> > get_statement() const;
     void lexical(ifstream& r_file);
     int file_read();
 };

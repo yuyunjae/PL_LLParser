@@ -28,8 +28,8 @@ public:
 class Derivation
 {
 private:
-    vector<pair<string, int>> lexeme_table;
-    vector<pair<string, int>> &statement;
+    vector<pair<string, int> > lexeme_table;
+    vector<pair<string, int> > &statement;
     unsigned int current_index = 0;
     pair<string, int> next_token;
     vector<idents> symbol_table;
@@ -65,7 +65,7 @@ public:
     shared_ptr<Node> right_paren();
     void error();
 
-    Derivation(const vector<pair<string, int>>& lex_table, vector<pair<string, int>>& statement);
+    Derivation(const vector<pair<string, int> >& lex_table, vector<pair<string, int> >& statement);
 
     int getIDCount();
     int getOPCount();

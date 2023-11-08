@@ -202,12 +202,12 @@ void Lex::lexical(ifstream& r_file)
     }
 }
 
-vector<pair<string, int>> Lex::get_vector() const
+vector<pair<string, int> > Lex::get_vector() const
 {
     return lexeme_table;
 }
 
-vector<pair<string, int>> Lex::get_statement() const
+vector<pair<string, int> > Lex::get_statement() const
 {
     return statement;
 }
