@@ -236,12 +236,13 @@ std::shared_ptr<Node> Derivation::term_tail()  //입실론 처리할 것 -> 완�
         }
     }
     else if(next_token.second == IDENT || next_token.second == INT_LIT || next_token.second == LEFT_PAREN){
-        errorCase[errorCount] = 3;
-        error();
-        //
-        node->is_unknown = 0; 
-        node->pos_neg = -1;
-        node->num = 0;
+        while(next_token.second == IDENT || next_token.second == INT_LIT || next_token.second == LEFT_PAREN){
+            errorCase[errorCount] = 3;
+            error();
+            node->is_unknown = 0;
+            node->pos_neg = -1;
+            node->num = 0;
+        }
     }
     else{ // 입실론 일 때
         node->is_unknown = 0; 
@@ -319,11 +320,13 @@ std::shared_ptr<Node> Derivation::factor_tail() //입실론 처리할 것 -> 완
 
     }
     else if(next_token.second == IDENT || next_token.second == INT_LIT || next_token.second == LEFT_PAREN){
-        errorCase[errorCount] = 3;
-        error();
-        node->is_unknown = 0;
-        node->pos_neg = -1;
-        node->num = 0;
+        while(next_token.second == IDENT || next_token.second == INT_LIT || next_token.second == LEFT_PAREN){
+            errorCase[errorCount] = 3;
+            error();
+            node->is_unknown = 0;
+            node->pos_neg = -1;
+            node->num = 0;
+        }
     }
     else{ // 입실론 일 때
         node->is_unknown = 0;
