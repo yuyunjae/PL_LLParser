@@ -32,6 +32,7 @@ int main(int argc, char **argv)
     //root->printTree(0);
     std::cout << "\n";
     derivation.printSymbolTableAll();
+    std::cout << "\n";
 
     return (0);
 }
