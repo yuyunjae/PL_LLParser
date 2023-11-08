@@ -49,7 +49,7 @@ void Derivation::errorMessage(){ // 예외처리 메시지를 출력하는 메�
             int error = errorCase[i];
             switch(error){
                 case 1:
-                    std::cout << "\e[31;1m(ERROR) \"There are undefined operand (" << errorLexeme[i] << error << ") was referenced\"\e[31;0m\e[37m" << std::endl; // error의 경우 굵은 붉은색으로 cli에 출력.
+                    std::cout << "\e[31;1m(ERROR) \"There are undefined operand (" << errorLexeme[i] << ") was referenced\"\e[31;0m\e[37m" << std::endl; // error의 경우 굵은 붉은색으로 cli에 출력.
                     break;
                 case 2:
                     std::cout << "\e[31m(Warning) \"There are duplicated operator, so Remove(" << errorLexeme[i]  << ") operator \"\e[37m" << std::endl; // warning의 경우 일반적인 붉은색으로 cli에 출력.
