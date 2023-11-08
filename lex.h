@@ -38,16 +38,16 @@ private:
     int next_token; // 읽어온 token의 타입(코드들).
     int char_class; // 하나의 ch를 읽었을 때 예상되는 lex의 그 타입.
     int num_state; // 몇 번째 statement인지.
-    //int b_char_class; // ch 하나 전 char_class
     
-    void get_char(ifstream& r_file);
-    void lookup();
+    void get_char(ifstream& r_file); // 파일에서 한 문자씩 읽어오는 method.
+    void lookup(); // 읽어온 문자의 유형 (char_class)가 unknown일 때 이를 토큰 코드별로 구분&처리 해주는 method.
 public:
-    Lex(string file_name);
-    vector<pair<string, int> > get_vector() const;
-    vector<pair<string, int> > get_statement() const;
-    void lexical(ifstream& r_file);
-    int file_read();
+    Lex(string file_name); // 생성자. 읽어올 파일 이름을 매개변수로 받음.
+    vector<pair<string, int> > get_vector() const; // lexeme_table을 return 함.
+    vector<pair<string, int> > get_statement() const; // 각 statement들의 예외처리들을 return 함.
+    void lexical(ifstream& r_file); // 읽은 문자(char 1개)를 char_class값을 이용해 추가적인 문자를 읽거나 
+    //분석하여 하나의 lexeme을 만들어냄.
+    int file_read(); // 파일을 열어서 한개의 문자를 읽고 lexical을 호출하는 코드.
 };
 
 #endif
