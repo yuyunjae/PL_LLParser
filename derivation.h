@@ -1,6 +1,8 @@
 #ifndef DERIVATION_H
 # define DERIVATION_H
 
+#define ERROR_CASE_MAX_COUNT 40
+
 #include <memory>
 #include <cstdlib>
 
@@ -27,6 +29,7 @@ class Derivation
 {
 private:
     vector<pair<string, int>> lexeme_table;
+    vector<pair<string, int>> &statement;
     unsigned int current_index = 0;
     pair<string, int> next_token;
     vector<idents> symbol_table;
@@ -34,15 +37,19 @@ private:
     int ID = 0;
     int OP = 0;
     int CONST = 0;
+    int errorCase[ERROR_CASE_MAX_COUNT] = {0};
+    string errorLexeme[ERROR_CASE_MAX_COUNT];
+    int errorCount = 0;
+    int statementCount = 0;
 
 public:
     pair<string, int> lex();
 
-    pair<string, int> current_lex();
+    void errorMessage();
     
     shared_ptr<Node> programs();
     shared_ptr<Node> statements();
-    shared_ptr<Node> statement();
+    shared_ptr<Node> getstatement();
     shared_ptr<Node> expression();
     shared_ptr<Node> term_tail();
     shared_ptr<Node> term();
@@ -58,7 +65,7 @@ public:
     shared_ptr<Node> right_paren();
     void error();
 
-    Derivation(const vector<pair<string, int>> &lex_table);
+    Derivation(const vector<pair<string, int>>& lex_table, vector<pair<string, int>>& statement);
 
     int getIDCount();
     int getOPCount();

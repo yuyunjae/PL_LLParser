@@ -4,7 +4,7 @@ Lex::Lex(string file_name)
 {
     filename = file_name;
     next_token = WHITE_SPACE;
-    num_state = 0;
+    num_state = 1;
     char_class = WHITE_SPACE;
     ch = 0;
 }
@@ -72,6 +72,8 @@ void Lex::lookup()
     }
     else if (ch == ':')
         next_token = COLON;
+    else if (ch == '=') //등호만 올 때
+        next_token = ASSIGN_OP;
     else if (ch == ';')
     {
         next_token = SEMI_COLON;
@@ -148,10 +150,25 @@ void Lex::lexical(ifstream& r_file)
                 {   // : 만 올떄
                     // warning! 등호가 오지 않았으므로 :는 올바른 토큰이 아님.
                     string s = "(Warning) ':' should always be followed by '='. add '='";
+                    token_string += "=";
+                    next_token = ASSIGN_OP;
+                    lexeme_table.push_back(make_pair(token_string, next_token));
                     statement.push_back(make_pair(s, num_state));
                     token_string.clear();
                     lexical(r_file);
                 }
+            }
+            else if (ch == '=')
+            {
+                get_char(r_file);
+                // warning! 콜론이 오지 않았으므로 '='는 올바른 토큰이 아님.
+                string s = "(Warning) '=' must always be preceded by ':'. add ':'";
+                token_string += ":=";
+                next_token = ASSIGN_OP;
+                lexeme_table.push_back(make_pair(token_string, next_token));
+                statement.push_back(make_pair(s, num_state));
+                token_string.clear();
+                lexical(r_file);
             }
             else if(next_token == 22)
             {  
@@ -163,6 +180,7 @@ void Lex::lexical(ifstream& r_file)
                 {
                     lexeme_table.push_back(make_pair(token_string, next_token));
                     token_string.clear();
+                    lexical(r_file);
                 }
             }
             else if(next_token >= 21 && next_token <= 27)
@@ -173,8 +191,9 @@ void Lex::lexical(ifstream& r_file)
             }
             else if(next_token == UNKNOWN)
             {   // 정의되지 않은 연산자가 들어올때
-                string s = "(Warning) remove undefined operator: '";
+                string s = "(Warning) \"remove undefined operator: '";
                 s += ch;
+                s += "'\"";
                 statement.push_back(make_pair(s, num_state));
             }
             break;

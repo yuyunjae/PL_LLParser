@@ -5,8 +5,8 @@ void Node::printTree(int level) const
 {
     std::string indent(level * 2, ' '); // 각 레벨에 대해 2칸씩 들여쓰기를 합니다.
     std::cout << indent << this->name << std::endl;
-    if (!this->is_unknown)
-        std::cout << indent << this->num << " " <<this->pos_neg << "\n";
+    // if (!this->is_unknown)
+    //     std::cout << indent << this->num << " " <<this->pos_neg << "\n";
 
     for (auto& child : this->children)
     {
@@ -21,18 +21,46 @@ void Derivation::printStatement(const shared_ptr<Node>& node)
     && node->name != "factor" && node->name != "assignment_op" && node->name != "ident" && node->name != "int_lit" 
     && node->name != "semi_colon" && node->name != "add_operator" && node->name != "mult_operator" 
     && node->name != "left_paren" && node->name != "right_paren")
-        std::cout << node->name << " ";
+        std::cout << "\e[37m" << node->name << " ";
     for (auto& child : node->children)
     {
         printStatement(child); // 자식 노드에 대해 재귀적으로 함수를 호출합니다.
     }
     if (node->name == "statements")
-        cout << "\n";
+        cout << "\e[37m\n";
 }
 
-Derivation::Derivation(const vector<pair<string, int>>& lex_table) : lexeme_table(lex_table){
+Derivation::Derivation(const vector<pair<string, int>>& lex_table, vector<pair<string, int>>& statement) : lexeme_table(lex_table), statement(statement){
     next_token = lex(); // 첫 번째 토큰을 가져옵니다.
     resetCounts();
+}
+
+void Derivation::errorMessage(){
+    statementCount++;
+    for (const auto& token : statement){
+        if(token.second == statementCount){
+            std::cout << token.first << endl;
+        }
+    }
+    for(int i=0; i<ERROR_CASE_MAX_COUNT;i++){
+        if(errorCase[i] != 0){
+            int error = errorCase[i];
+            switch(error){
+                case 1:
+                    std::cout << "\e[31;1m(ERROR) \"There are undefined operand (" << errorLexeme[i] << error << ") was referenced\"\e[31;0m\e[37m" << std::endl;
+                    break;
+                case 2:
+                    std::cout << "\e[31m(Warning) \"There are duplicated operator, so Remove(" << errorLexeme[i]  << ") operator \"\e[37m" << std::endl;
+                    break;
+            }   
+        }
+        errorCase[i] = 0;
+        
+    }
+    if(errorCount == 0){
+        std::cout << "\e[34m(OK)\e[37m"<< std::endl;
+    }
+    errorCount = 0;
 }
 
 std::pair<std::string, int> Derivation::lex()
@@ -45,16 +73,6 @@ std::pair<std::string, int> Derivation::lex()
     }
 }
 
-std::pair<std::string, int> Derivation::current_lex()
-{
-    if (current_index >= lexeme_table.size()) {
-        // 더 이상 읽을 토큰이 없을 경우, EOF를 의미하는 토큰을 반환합니다.
-        return make_pair("", EOF);
-    } else {
-        return lexeme_table[current_index];
-        }
-}
-
 std::shared_ptr<Node> Derivation::programs() 
 {
     shared_ptr<Node> node = make_shared<Node>("programs");
@@ -65,6 +83,7 @@ std::shared_ptr<Node> Derivation::programs()
         std::cout << "ID: " << getIDCount() << "; ";
         std::cout << "CONST: " << getCONSTCount() << "; ";
         std::cout << "OP: " << getOPCount() << std::endl;
+        errorMessage();
     }
     return node;
 }
@@ -73,14 +92,16 @@ std::shared_ptr<Node> Derivation::statements()
 {
     shared_ptr<Node> node = make_shared<Node>("statements");
     if(next_token.second != SEMI_COLON && next_token.second != EOF) {
-        node->children.push_back(statement());
+        node->children.push_back(getstatement());
     }
+    
     // symbol table에서 LHS값 계산해놓기.
     if (next_token.second == SEMI_COLON) {
         node->children.push_back(semi_colon());
         if (node->children.size() == 2)
         {
             // 세미콜론 출력 o
+            cout << "\n";
             printStatement(node);
             // ID, OP, CONST의 개수를 출력
            if (getIDCount() || getCONSTCount() || getOPCount())
@@ -88,6 +109,7 @@ std::shared_ptr<Node> Derivation::statements()
                 std::cout << "ID: " << getIDCount() << "; ";
                 std::cout << "CONST: " << getCONSTCount() << "; ";
                 std::cout << "OP: " << getOPCount() << std::endl;
+                errorMessage();
             }
             resetCounts();
         }
@@ -96,12 +118,14 @@ std::shared_ptr<Node> Derivation::statements()
     else if(node->children.size() == 1)
     {
         // 세미콜론 출력 x
+        cout << "\n";
         printStatement(node);
     }
+    
     return node;
 }
 
-std::shared_ptr<Node> Derivation::statement() 
+std::shared_ptr<Node> Derivation::getstatement() 
 {
     shared_ptr<Node> node = make_shared<Node>("statement");
     if(next_token.second == IDENT){
@@ -169,38 +193,43 @@ std::shared_ptr<Node> Derivation::term_tail()  //입실론 처리할 것
     shared_ptr<Node> node = make_shared<Node>("term_tail");
     if(next_token.second == ADD_OP || next_token.second == SUB_OP){ // 덧셈 or 뺄셈
         node->children.push_back(add_operator());
-        node->children.push_back(term());
-        if (next_token.second != EOF) { // EOF 조건 추가
-            node->children.push_back(term_tail());
+        while (next_token.second == ADD_OP || next_token.second == SUB_OP || next_token.second == MULT_OP || next_token.second == DIV_OP){
+            errorCase[errorCount] = 2;
+            error();
         }
+        if(next_token.second != ADD_OP && next_token.second != SUB_OP && next_token.second != MULT_OP && next_token.second != DIV_OP){
+            node->children.push_back(term());
+            if (next_token.second != EOF) { // EOF 조건 추가
+                node->children.push_back(term_tail());
+            }
 
-        //node->pos_neg mult_operator가 -인지 +인지 저장.
-        if (!node->children[0]->is_unknown)
-            node->pos_neg = node->children[0]->pos_neg;
+            //node->pos_neg mult_operator가 -인지 +인지 저장.
+            if (!node->children[0]->is_unknown)
+                node->pos_neg = node->children[0]->pos_neg;
 
-        for (unsigned int i=1; i < node->children.size(); i++)
-        {
-            if (!node->children[i]->is_unknown)
+            for (unsigned int i=1; i < node->children.size(); i++)
             {
-                if (node->children[i]->name == "term"){
-                    node->is_unknown = 0;
-                    node->num = node->children[i]->num;
+                if (!node->children[i]->is_unknown)
+                {
+                    if (node->children[i]->name == "term"){
+                        node->is_unknown = 0;
+                        node->num = node->children[i]->num;
+                    }
+                    else if (node->children[i]->name == "term_tail")
+                    {// 입실론의 경우 아무것도 곱/나누지 않음.
+                        if (node->children[i]->pos_neg == 0) // 덧셈
+                            node->num += node->children[i]->num;
+                        else if (node->children[i]->pos_neg == 1) // 뺄셈
+                            node->num -= node->children[i]->num;
+                    }
                 }
-                else if (node->children[i]->name == "term_tail")
-                {// 입실론의 경우 아무것도 곱/나누지 않음.
-                    if (node->children[i]->pos_neg == 0) // 덧셈
-                        node->num += node->children[i]->num;
-                    else if (node->children[i]->pos_neg == 1) // 뺄셈
-                        node->num -= node->children[i]->num;
+                else
+                {
+                    node->is_unknown = 1; // children node에 unknown이 존재.
+                    break ;
                 }
             }
-            else
-            {
-                node->is_unknown = 1; // children node에 unknown이 존재.
-                break ;
-            }
         }
-
     }
     else{ //입실론일떄 ? 아님 예외처리?
         node->is_unknown = 0; // 입실론 일 때
@@ -239,7 +268,12 @@ std::shared_ptr<Node> Derivation::factor_tail() //입실론 처리할 것
     shared_ptr<Node> node = make_shared<Node>("factor_tail");
     if(next_token.second == MULT_OP || next_token.second == DIV_OP){ //나눗셈 or 곱셈
         node->children.push_back(mult_operator());
-        node->children.push_back(factor());
+        while (next_token.second == ADD_OP || next_token.second == SUB_OP || next_token.second == MULT_OP || next_token.second == DIV_OP){
+            errorCase[errorCount] = 2;
+            error();
+        }
+        if (next_token.second != ADD_OP && next_token.second != SUB_OP && next_token.second != MULT_OP && next_token.second != DIV_OP)
+            node->children.push_back(factor());
         if (next_token.second != EOF) { // EOF 조건 추가
             node->children.push_back(factor_tail());
         }
@@ -317,9 +351,7 @@ std::shared_ptr<Node> Derivation::factor()
             //node->pos_neg = 99;
         }
     }
-    else{
-        error();
-    }
+
     return node;
 }
 
@@ -383,7 +415,9 @@ std::shared_ptr<Node> Derivation::ident()
         {
             ident_node->is_unknown = 1;
             // 값이 정의가 되어 있지 않는 ident 에러
-                    // 에러 메시지 준비해야함.
+            errorCase[errorCount] = 1;
+            errorLexeme[errorCount] = next_token.first;
+            errorCount++;
 
             idents id; //-> symbol table에 새로운 ident생성.
 
@@ -477,11 +511,10 @@ std::shared_ptr<Node> Derivation::right_paren()
 
 void Derivation::error()
 {
-    std::cerr << "Parsing Error: Unexpected token " << next_token.first << std::endl;
-    std::cerr << "Number of IDENT tokens processed: " << getIDCount() << std::endl;
-    std::cerr << "Number of CONST tokens processed: " << getCONSTCount() << std::endl;
-    std::cerr << "Number of OP tokens processed: " << getOPCount() << std::endl;
-     // 이 부분은 실행되지 않지만, 함수의 반환 타입에 맞추기 위해 추가했습니다.
+    errorLexeme[errorCount] = next_token.first;
+    next_token = lex();
+    errorCount++;
+    
 }
 
 int Derivation::getIDCount(){
@@ -505,18 +538,18 @@ void Derivation::resetCounts() {
 
 void Derivation::printSymbolTableAll()
 {
-    std::cout << "Result ==> ";
+    std::cout << "\e[37;1mResult ==> ";
     for (auto iter = symbol_table.begin(); iter < symbol_table.end() - 1; iter++)
     {
         std::cout << iter->name << ": ";
         if (!iter->is_unknown)
             std::cout << iter->num << "; ";
         else
-            std::cout << "UnKnown; ";
+            std::cout << "Unknown; ";
     }
     std::cout << (symbol_table.end() - 1)->name << ": ";
         if (!(symbol_table.end() - 1)->is_unknown)
             std::cout << (symbol_table.end() - 1)->num;
         else
-            std::cout << "UnKnown";
+            std::cout << "UnKnown\e[37;0m";
 }
