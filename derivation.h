@@ -18,7 +18,7 @@ public:
     int is_unknown; // 1 -> Unknown , 0 -> known // 현재 값이 저장되어 있는지 여부.
     int pos_neg; // 1 -> div/sub, 0 -> mul, plus , -1 -> 입실론, 99-> 상관 x (어떤 연산자인지 여부)
     string name; // 해당 node의 이름.
-    vector<shared_ptr<Node> > children; // 스마트 포인터를 이용해 파스트리를 구성.
+    vector<shared_ptr<Node> > children; // 스마트 포인터를 이용해 파스트리를 구성. (linked list 방식)
     // 해당 노드의 자식노드의 포인터 값이 여기에 저장됨.
 
     void printTree(int level) const; // 파스 트리의 구성을 확인하기 위한 메소드. 파스트리의 레벨은 들여쓰기로 표현함.
