@@ -39,7 +39,7 @@ void Lex::get_char(ifstream& r_file)
     else if (isdigit(ch))
         char_class = DIGIT;
     else if (ch >= 0 && ch <= 32)
-        char_class = WHITE_SPACE; // 이거 뺄지말지 생각해보기
+        char_class = WHITE_SPACE;
     else 
         char_class = UNKNOWN;
 }
@@ -103,11 +103,11 @@ void Lex::lexical(ifstream& r_file)
             next_token = IDENT;
             lexeme_table.push_back(make_pair(token_string, next_token));
             token_string.clear();
-            if (char_class == UNKNOWN) // 예외처리 만약 괄호닫기 처럼 문자 바로 뒤에 바로 붙어서 오는 어떤 연산자일 경우
+            if (char_class == UNKNOWN) // 예외처리 만약 괄호닫기 처럼 문자나 숫자 바로 뒤에 바로 붙어서 오는 어떤 연산자일 경우
                 return lexical(r_file);
             break;
     
-        case DIGIT:
+        case DIGIT: // const
             while (char_class == DIGIT)
             {
                 token_string += ch;
@@ -118,10 +118,6 @@ void Lex::lexical(ifstream& r_file)
             token_string.clear();
             if (char_class == UNKNOWN) // 만약 괄호닫기 처럼 바로 붙어서 오는 어떤 lexeme일 경우
                 return lexical(r_file);
-            else if (char_class == LETTER) // 숫자 뒤에 바로 문자가 띄어쓰기없이 딱 붙어서 올 경우..
-            {
-                // 이런 예외도 처리 해야할까..
-            }
             break;
 
         case WHITE_SPACE:
@@ -130,7 +126,7 @@ void Lex::lexical(ifstream& r_file)
 
         case EOF:
             num_state += 1;
-            // 아직 딱히 처리할 게 없으.
+            // state 숫자만 올려줌.
             break;
 
         case UNKNOWN:
@@ -170,7 +166,7 @@ void Lex::lexical(ifstream& r_file)
                 token_string.clear();
                 lexical(r_file);
             }
-            else if(next_token == 22)
+            else if(next_token == 22) // '-'다음 숫자가 오면 음수처리
             {  
                 token_string += ch;
                 get_char(r_file);
@@ -183,7 +179,7 @@ void Lex::lexical(ifstream& r_file)
                     lexical(r_file);
                 }
             }
-            else if(next_token >= 21 && next_token <= 27)
+            else if(next_token >= 21 && next_token <= 27) // 정의된 연산자
             {
                 token_string += ch;
                 lexeme_table.push_back(make_pair(token_string, next_token));
@@ -202,12 +198,12 @@ void Lex::lexical(ifstream& r_file)
     }
 }
 
-vector<pair<string, int> > Lex::get_vector() const
+vector<pair<string, int> > Lex::get_vector() const // lexeme_table을 리턴.
 {
     return lexeme_table;
 }
 
-vector<pair<string, int> > Lex::get_statement() const
+vector<pair<string, int> > Lex::get_statement() const // 예외처리 메시지를 담은 statement를 리턴
 {
     return statement;
 }
