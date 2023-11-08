@@ -1,4 +1,4 @@
-G++ = g++ -Wall -Wextra -Werror
+G++ = g++ -Wall -Wextra -Werror -std=c++11
 NAME = parser.exe
 SRCS = lex.cpp main.cpp derivation.cpp
 OBJS = $(SRCS:.cpp=.o)

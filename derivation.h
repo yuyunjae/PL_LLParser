@@ -18,7 +18,7 @@ public:
     int is_unknown; // 1 -> Unknown , 0 -> known 
     int pos_neg; // 1 -> div/sub, 0 -> mul, plus , -1 -> 입실론, 99-> 상관 x
     string name;
-    vector<shared_ptr<Node>> children;
+    vector<shared_ptr<Node> > children;
 
     void printTree(int level) const;
 
