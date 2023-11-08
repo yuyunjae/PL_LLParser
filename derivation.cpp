@@ -39,7 +39,8 @@ void Derivation::errorMessage(){
     statementCount++;
     for (const auto& token : statement){
         if(token.second == statementCount){
-            std::cout << token.first << endl;
+            std::cout << "\e[31m" << token.first << "\e[37m" << endl;
+            errorCount += 1;
         }
     }
     for(int i=0; i<ERROR_CASE_MAX_COUNT;i++){
@@ -184,7 +185,6 @@ std::shared_ptr<Node> Derivation::expression()
                 node->num -= node->children[1]->num;
         }
     }
-
     return node;
 }
 
